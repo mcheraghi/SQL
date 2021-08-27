@@ -257,6 +257,10 @@ FROM  #maxtracks
 ORDER BY max_track_length_mins DESC, artist;
 
 
+-- Identify the correct constraint name
+SELECT constraint_name, table_name, constraint_type
+FROM information_schema.table_constraints
+WHERE constraint_type = 'FOREIGN KEY';
 
 ------------------------------------------------------------------------------------------------------------------------ALTER TABLE
 
@@ -279,3 +283,92 @@ ALTER COLUMN firstname SET NOT NULL;
 -- Make universities.university_shortname unique
 ALTER TABLE universities
 ADD CONSTRAINT university_shortname_unq UNIQUE(university_shortname);
+
+ALTER TABLE table_name
+ADD column_name datatype;
+ALTER TABLE Customers
+ADD Email varchar(255);
+
+ALTER TABLE table_name
+DROP COLUMN column_name;
+
+ALTER TABLE affiliations
+DROP CONSTRAINT affiliations_organization_id_fkey;
+------------------------------------------------------------------------------------------------------------------------PRIMARY‌ KEY
+
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    PRIMARY KEY (ID)
+);
+
+CREATE TABLE students (
+  last_name varchar(128) NOT NULL,
+  ssn INTEGER PRIMARY KEY,
+  phone_no char(12)
+);
+
+-- Rename the university_shortname column to id
+ALTER TABLE universities
+RENAME COLUMN university_shortname TO id;
+
+ALTER TABLE universities
+ADD CONSTRAINT university_pk PRIMARY KEY (id);
+
+-- Add the new column to the table
+ALTER TABLE professors 
+ADD COLUMN id serial PRIMARY KEY;
+
+
+#----------------------------------------------------------------------------------------concatenating two columns as PK
+-- Count the number of distinct rows with columns make, model
+SELECT COUNT(DISTINCT(make, model)) 
+FROM cars;
+
+-- Add the id column
+ALTER TABLE cars
+ADD COLUMN id varchar(128);
+
+-- Update id with make + model
+UPDATE cars
+SET id = CONCAT(make, model);
+
+-- Make id a primary key
+ALTER TABLE cars
+ADD CONSTRAINT id_pk PRIMARY KEY(id);
+
+-- Have a look at the table
+SELECT * FROM cars;
+
+
+
+---------------------------------------------------------------------------------------------------Foreign key
+
+CREATE TABLE Orders (
+    OrderID int NOT NULL PRIMARY KEY,
+    OrderNumber int NOT NULL,
+    PersonID int FOREIGN KEY REFERENCES Persons(PersonID)
+);
+
+
+-- Add a foreign key on professors referencing universities
+ALTER TABLE professors
+ADD CONSTRAINT professors_fkey FOREIGN KEY (university_id) REFERENCES  universities (id);
+
+
+-- Add a professor_id column
+ALTER TABLE affiliations
+ADD COLUMN professor_id integer REFERENCES professors (id);
+
+
+
+-- Update professor_id to professors.id where firstname, lastname correspond to rows in professors
+UPDATE affiliations
+SET professor_id = professors.id
+FROM professors
+WHERE affiliations.firstname = professors.firstname AND affiliations.lastname = professors.lastname;
+
+
+
